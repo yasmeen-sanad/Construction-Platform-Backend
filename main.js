@@ -37,14 +37,12 @@ app.options('*', cors());
 app.use(express.json());
 
 // اتصال بقاعدة البيانات
-
-mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://buildmart:Construction-Platform-Backend@cluster0.nsddhfd.mongodb.net/buildmart?retryWrites=true&w=majority', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
+mongoose.connect(
+  process.env.MONGODB_URI || 'mongodb+srv://buildmart:Construction-Platform-Backend@cluster0.nsddhfd.mongodb.net/buildmart?retryWrites=true&w=majority',
+  { useNewUrlParser: true, useUnifiedTopology: true }
+)
 .then(() => console.log('✅ قاعدة البيانات متصلة'))
 .catch(err => console.log('❌ خطأ في الاتصال:', err));
-
 // نماذج البيانات
 const userSchema = new mongoose.Schema({
   name: {
