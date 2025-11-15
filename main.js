@@ -37,7 +37,8 @@ app.options('*', cors());
 app.use(express.json());
 
 // اتصال بقاعدة البيانات
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/buildmart', {
+
+mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://buildmart:Construction-Platform-Backend@cluster0.nsddhfd.mongodb.net/buildmart?retryWrites=true&w=majority', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
