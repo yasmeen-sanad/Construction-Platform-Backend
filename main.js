@@ -254,106 +254,17 @@ const addSampleProducts = async () => {
   }
 };
 // نموذج المصنع (Factory Schema)
+
 const factorySchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: [true, 'اسم المصنع مطلوب'],
-    trim: true
-  },
-  description: {
-    type: String,
-    required: [true, 'وصف المصنع مطلوب']
-  },
-  specialization: {
-    type: String,
-    required: [true, 'التخصص مطلوب'],
-    enum: ['مواد أساسية', 'مواد بناء', 'ادوات كهربائية', 'ادوات صحية', 'أبواب ونوافذ', 'حديد وصلب']
-  },
-  location: {
-    city: {
-      type: String,
-      required: [true, 'المدينة مطلوبة']
-    },
-    address: {
-      type: String,
-      required: [true, 'العنوان مطلوب']
-    },
-    coordinates: {
-      lat: Number,
-      lng: Number
-    }
-  },
-  contact: {
-    phone: {
-      type: String,
-      required: [true, 'رقم الجوال مطلوب']
-    },
-    email: {
-      type: String,
-      required: [true, 'البريد الإلكتروني مطلوب'],
-      lowercase: true,
-      trim: true
-    },
-    website: String
-  },
-  logo: {
-    type: String,
-    default: 'https://via.placeholder.com/200x200?text=  مصنع'
-  },
-  rating: {
-    type: Number,
-    default: 0,
-    min: 0,
-    max: 5
-  },
-  reviewsCount: {
-    type: Number,
-    default: 0
-  },
-  productsCount: {
-    type: Number,
-    default: 0
-  },
-  certifications: [{
-    type: String
-  }],
-  workingHours: {
-    from: {
-      type: String,
-      default: '08:00'
-    },
-    to: {
-      type: String,
-      default: '17:00'
-    },
-    workingDays: {
-      type: [String],
-      default: ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس']
-    }
-  },
-  deliveryAvailable: {
-    type: Boolean,
-    default: true
-  },
-  minimumOrder: {
-    type: Number,
-    default: 0
-  },
-  isVerified: {
-    type: Boolean,
-    default: false
-  },
-  isActive: {
-    type: Boolean,
-    default: true
-  }
-}, {
-  timestamps: true
-});
+  name: { type: String, required: [true, 'اسم المصنع مطلوب'], trim: true },
+  location: { type: String, required: [true, 'الموقع مطلوب'], trim: true },
+  image: { type: String, default: '/uploads/default-factory.jpg' },
+  productsCount: { type: Number, default: 0 },
+  contactEmail: { type: String, trim: true },
+  contactPhone: { type: String, trim: true }
+}, { timestamps: true });
 
 const Factory = mongoose.model('Factory', factorySchema);
-// استدعاء الدالة عند تشغيل السيرفر
-addSampleProducts();
 
 // إنشاء JWT token
 const signToken = (id) => {
@@ -704,63 +615,53 @@ app.get('/api/orders/:id', protect, async (req, res) => {
   }
 });
 
-/// 🏭 GET All Factories (أضفها هنا)
 app.get('/api/factories', async (req, res) => {
   try {
-    const { 
-      specialization, 
-      city, 
-      verified, 
-      minRating,
-      search 
-    } = req.query;
-    
-    let filter = { isActive: true };
-    
-    // Filter by specialization
-    if (specialization) {
-      filter.specialization = specialization;
-    }
-    
-    // Filter by city
-    if (city) {
-      filter['location.city'] = city;
-    }
-    
-    // Filter by verified status
-    if (verified !== undefined) {
-      filter.isVerified = verified === 'true';
-    }
-    
-    // Filter by minimum rating
-    if (minRating) {
-      filter.rating = { $gte: Number(minRating) };
-    }
-    
-    // Search by name or description
-    if (search) {
-      filter.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } }
-      ];
-    }
-
-    const factories = await Factory.find(filter).sort({ rating: -1, reviewsCount: -1 });
-    
-    res.status(200).json({
-      success: true,
-      count: factories.length,
-      factories
-    });
-
+    const factories = await Factory.find().sort({ createdAt: -1 });
+    res.status(200).json({ success: true, count: factories.length, factories });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في جلب المصانع',
-      error: error.message
-    });
+    res.status(500).json({ success: false, message: 'خطأ في جلب المصانع', error: error.message });
   }
 });
+
+// إضافة بيانات تجريبية للمصانع
+const addSampleFactories = async () => {
+  try {
+    const count = await Factory.countDocuments();
+    if (count === 0) {
+      await Factory.create([
+        {
+          name: 'محاجر الرياض',
+          location: 'الرياض',
+          image: '/uploads/factory1.png',
+          productsCount: 77
+        },
+        {
+          name: 'شركة الاسمنت الوطنية',
+          location: 'الخرج',
+          image: '/uploads/factory2.png',
+          productsCount: 64
+        },
+        {
+          name: 'يد الحرفي',
+          location: 'تبوك',
+          image: '/uploads/factory3.png',
+          productsCount: 38
+        },
+        {
+          name: 'WoodMax',
+          location: 'القصيم',
+          image: '/uploads/factory4.png',
+          productsCount: 52
+        }
+      ]);
+      console.log('🏭 تم إضافة مصانع تجريبية');
+    }
+  } catch (err) {
+    console.error('❌ خطأ في إضافة المصانع:', err.message);
+  }
+};
+addSampleFactories();
 
 // 🔔 Notifications API
 app.get('/api/notifications', protect, async (req, res) => {
