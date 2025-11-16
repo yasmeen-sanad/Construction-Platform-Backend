@@ -250,7 +250,105 @@ const addSampleProducts = async () => {
     console.log('❌ خطأ في إضافة المنتجات التجريبية:', error.message);
   }
 };
+// نموذج المصنع (Factory Schema)
+const factorySchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: [true, 'اسم المصنع مطلوب'],
+    trim: true
+  },
+  description: {
+    type: String,
+    required: [true, 'وصف المصنع مطلوب']
+  },
+  specialization: {
+    type: String,
+    required: [true, 'التخصص مطلوب'],
+    enum: ['مواد أساسية', 'مواد بناء', 'ادوات كهربائية', 'ادوات صحية', 'أبواب ونوافذ', 'حديد وصلب']
+  },
+  location: {
+    city: {
+      type: String,
+      required: [true, 'المدينة مطلوبة']
+    },
+    address: {
+      type: String,
+      required: [true, 'العنوان مطلوب']
+    },
+    coordinates: {
+      lat: Number,
+      lng: Number
+    }
+  },
+  contact: {
+    phone: {
+      type: String,
+      required: [true, 'رقم الجوال مطلوب']
+    },
+    email: {
+      type: String,
+      required: [true, 'البريد الإلكتروني مطلوب'],
+      lowercase: true,
+      trim: true
+    },
+    website: String
+  },
+  logo: {
+    type: String,
+    default: 'https://via.placeholder.com/200x200?text=  مصنع'
+  },
+  rating: {
+    type: Number,
+    default: 0,
+    min: 0,
+    max: 5
+  },
+  reviewsCount: {
+    type: Number,
+    default: 0
+  },
+  productsCount: {
+    type: Number,
+    default: 0
+  },
+  certifications: [{
+    type: String
+  }],
+  workingHours: {
+    from: {
+      type: String,
+      default: '08:00'
+    },
+    to: {
+      type: String,
+      default: '17:00'
+    },
+    workingDays: {
+      type: [String],
+      default: ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس']
+    }
+  },
+  deliveryAvailable: {
+    type: Boolean,
+    default: true
+  },
+  minimumOrder: {
+    type: Number,
+    default: 0
+  },
+  isVerified: {
+    type: Boolean,
+    default: false
+  },
+  isActive: {
+    type: Boolean,
+    default: true
+  }
+}, {
+  timestamps: true
+});
 
+const Factory = mongoose.model('Factory', factorySchema);
 // استدعاء الدالة عند تشغيل السيرفر
 addSampleProducts();
 
@@ -598,6 +696,32 @@ app.get('/api/orders/:id', protect, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'خطأ في جلب الطلب',
+      error: error.message
+    });
+  }
+});
+
+// 🏭 GET Single Factory (لجلب تفاصيل مصنع معين)
+app.get('/api/factories/:id', async (req, res) => {
+  try {
+    const factory = await Factory.findById(req.params.id);
+    
+    if (!factory) {
+      return res.status(404).json({
+        success: false,
+        message: 'المصنع غير موجود'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      factory
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'خطأ في جلب المصنع',
       error: error.message
     });
   }
