@@ -9,6 +9,7 @@ const app = express();
 
 // 🔧 إعدادات CORS مبسطة وآمنة للفرونت
 const allowedOrigins = [
+  'construction-platform1.netlify.app',
   'http://localhost:3000',
   'http://127.0.0.1:5500',
   'https://one23-6-l3re.onrender.com',
@@ -125,7 +126,7 @@ const productSchema = new mongoose.Schema({
   unit: {
     type: String,
     required: [true, 'وحدة القياس مطلوبة'],
-    enum: ['كيلو', 'طن', 'متر', 'علبة', 'كيس']
+    enum: ['كيلو', 'طن', 'متر', 'علبة', 'كيس', 'قطعة']
   },
   isActive: {
     type: Boolean,
